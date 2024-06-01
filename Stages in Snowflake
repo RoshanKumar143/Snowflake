@@ -153,6 +153,11 @@ create table dummy_table(
 
 copy into dummy_table from @stage/external_file/ FILE_FORMAT = (TYPE = CSV SKIP_HEADER = 1);
 
+--OR we can use below cmd to create table using select cmd. But, default take Varchar dtype.
+create table dummy_table as select top 10 $1, $2, $3, $4, $5, $6, $7, $8 from @stage/external_file/ ;
+
+desc table dummy_table;
+
 select * from dummy_table;
 
 
