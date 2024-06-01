@@ -1,0 +1,165 @@
+--1. UserStage
+
+
+list @~;
+
+-- select * from @~;
+-- remove @~;
+
+create table student(
+    sid integer,
+    sname varchar(20)
+);
+
+-- LEARNING142#COMPUTE_WH@BULK_LOADING.LOAD_EXAMPLES>put file://E:\Snowflake_Classes\amz.csv @~/user_stage;
+
+list @~;
+
+-- select * from @~/json/;
+
+-- LEARNING142#COMPUTE_WH@BULK_LOADING.LOAD_EXAMPLES>copy into student from @~ FILE_FORMAT=(TYPE = csv SKIP_HEADER = 1);
+
+select * from student;
+
+
+
+--creating table for JSON FORMAT TABLE
+CREATE OR REPLACE TABLE my_json_table (
+    empid VARIANT,
+    ename VARIANT,
+    salary VARIANT,
+    doj VARIANT
+);
+
+drop table my_json_table;
+
+describe table my_json_table;
+
+CREATE OR REPLACE TABLE my_json_table (
+    col variant
+);
+
+list @~;
+
+create file format format_json;
+
+copy into my_json_table from @~/json/amazon.josn.gz FILE_FORMAT=(format_name=format_json);
+
+copy into my_json_table(empid, ename, salary, doj) from @~/json/amazon.json.gz FILE_FORMAT=(format_name=format_json);
+
+copy into my_json_table from @~/json/amazon.json.gz VALIDATION_MODE = 'RETURN_ERRORS';
+
+select * from student;
+
+
+
+
+
+--2. Table Stage
+
+create table table_stage(
+    empid int,
+    ename varchar(25),
+    salary int,
+    doj date
+);
+
+-- LEARNING142#COMPUTE_WH@BULK_LOADING.LOAD_EXAMPLES>put file://E\Snowflake_Classes\amazon.csv @%table_stage/f1;
+
+copy into table_stage from @%table_stage/f1/ FILE_FORMAT=(TYPE=CSV SKIP_HEADER=1);
+
+select * from @%table_stage;
+
+
+
+show stages;
+drop stage named_internal_stage;
+drop stage NAMED_INTERNAL_STAGE_WITH_FORMAT_OBJECT;
+
+
+
+--3. Named Stage
+create file format format_csv;
+
+create stage named_internal_stage;
+
+-- LEARNING142#COMPUTE_WH@BULK_LOADING.LOAD_EXAMPLES>put file://E:\Snowflake_Classes\market_list.csv @named_internal_stage/Goods;
+
+create table named_stage(
+    Items varchar(20),
+    quantity int,
+    price int
+);
+
+-- drop table named_stage;
+
+list @named_internal_stage;
+
+-- copy into named_stage from @named_internal_stage/goods/ FILE_FORMAT = (FORMAT_NAME = format_csv SKIP_HEADER = 1);    --"folder name CASE SENSITIVE"
+
+copy into named_stage from @named_internal_stage/Goods/ FILE_FORMAT = (FORMAT_NAME = format_csv SKIP_HEADER = 1);
+
+select * from named_stage;
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--here we are practicing External stage with unknown data file
+
+show tables;
+
+-- drop stage stage;
+
+show stages;
+
+create stage stage;
+
+-- LEARNING142#COMPUTE_WH@BULK_LOADING.LOAD_EXAMPLES>put file://E:\Snowflake_Classes\employees.csv @stage/external_file/;
+
+list @stage;
+select $1, $2, $3, $4, $5, $6, $7, $8, $9, $10 from @stage/external_file/;
+
+create table dummy_table(
+    sid varchar(30),
+    sname varchar(30),
+    info varchar(30),
+    email varchar(30),
+    name varchar(30),
+    phone varchar(30),
+    id varchar(30),
+    mbgname varchar(30)
+) 
+
+drop table dummy_table;
+
+copy into dummy_table from @stage/external_file/ VALIDATION_MODE = 'RETURN_10_ROWS'; 
+
+--now modify table structure based on displayed data.
+
+create table dummy_table(
+    First_Name varchar(30),
+    Gender varchar(10),
+    Start_Date Date,
+    Last_Login_Time varchar(20),
+    Salary int,
+    Bonus float,
+    Senior varchar(30),
+    Team varchar(30)
+) 
+
+copy into dummy_table from @stage/external_file/ FILE_FORMAT = (TYPE = CSV SKIP_HEADER = 1);
+
+select * from dummy_table;
+
+
+
+--------------------------------------------------------------------------------------------------------
+
+
+
+
+
