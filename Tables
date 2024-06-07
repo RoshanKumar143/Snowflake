@@ -1,0 +1,67 @@
+--TABLES
+
+-- 1.Permanent Tables
+
+create table table_permanent(
+    sid int,
+    sname varchar(30)
+)
+
+insert into table_permanent values (1, 'Permanent');
+
+
+
+--2. Transient Table
+
+create table table_transient(
+    sid int,
+    sname varchar(30)
+)
+
+insert into table_transient values (1, 'Transient');
+
+select * from table_transient;
+
+
+
+--3. Temporary Table
+
+create table table_temporary(
+    sid int,
+    sname varchar(30)
+)
+
+insert into table_temporary values(1, 'Temporary');
+
+select * from table_temporary;
+
+select current_session();   --1734458118193602
+
+-- after session logout and for ever login new session get created i.e.: 1734458118201802
+--1734458118185350
+
+select * from table_temporary;
+
+show tables;
+
+
+
+//Snowflake stores metrics about each table. 
+//The query above is an example of an excellent query you can run to see tables in a specific database or schema.
+
+SELECT // Gather information about tables
+ID
+,TABLE_NAME
+,TABLE_SCHEMA as SCHEMA
+,TABLE_CATALOG as CATALOG
+,ACTIVE_BYTES
+,TIME_TRAVEL_BYTES / (1024 * 1024 * 1024) as TIMETRAVEL_IN_GB
+,FAILSAFE_BYTES / (1024 * 1024 * 1024) as FAILSAFE_IN_GB
+,IS_TRANSIENT
+,TABLE_CREATED
+,TABLE_DROPPED
+,TABLE_ENTERED_FAILSAFE
+FROM SNOWFLAKE.ACCOUNT_USAGE.TABLE_STORAGE_METRICS
+WHERE TABLE_CATALOG = 'BULK_LOADING'        --Give DB Name
+ORDER BY TABLE_CREATED DESC ;
+
