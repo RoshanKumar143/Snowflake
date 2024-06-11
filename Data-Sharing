@@ -1,0 +1,150 @@
+use database sharing_example_db;
+
+show tables 
+-- drop schema sharing_example_db.sharing_schema;
+-- drop table sharing_example_db.sharing_schema.customer_table;
+
+--creating Schemas
+create schema Sharing_Schema1;
+create schema Sharing_Schema2;
+create schema Sharing_Schema3;
+
+--creating Tables in Schema1
+create table sharing_example_db.Sharing_Schema1.customer_table(
+    cust_no int,
+    cust_name varchar(30),
+    phone_nmber char(10)
+)CLUSTER BY(cust_no);
+
+insert into sharing_example_db.sharing_schema1.customer_table values(1, 'Sama', '9293939322');
+
+select * from sharing_example_db.sharing_schema1.customer_table;
+desc table sharing_example_db.sharing_schema1.customer_table;
+
+
+create table sharing_example_db.Sharing_Schema1.customer_table_v2(
+    cust_no int,
+    cust_name varchar(30),
+    phone_nmber char(10)
+)CLUSTER BY(cust_no);
+
+insert into sharing_example_db.sharing_schema1.customer_table_v2 values(2, 'Sama-v2', '7773939322');
+
+select * from sharing_example_db.sharing_schema1.customer_table_v2;
+
+
+
+--creating Schema2 Tables
+create table sharing_example_db.Sharing_Schema2.customer_table2(
+    cust_no int,
+    cust_name varchar(30),
+    phone_nmber char(10)
+)CLUSTER BY(cust_no);
+-- delete from sharing_example_db.sharing_schema2.customer_table2;
+
+insert into sharing_example_db.sharing_schema2.customer_table2 values(2, 'Schema2 Table Data', '9293939322');
+
+select * from sharing_example_db.sharing_schema2.customer_table2;
+
+
+--creating Schema3 Tables
+create table sharing_example_db.Sharing_Schema3.customer_table3(
+    cust_no int,
+    cust_name varchar(30),
+    phone_nmber char(10)
+)CLUSTER BY(cust_no);
+
+insert into sharing_example_db.sharing_schema3.customer_table3 values(3, 'Schema3 Table Data', '6693939322');
+
+select * from sharing_example_db.sharing_schema3.customer_table3;
+
+
+
+
+show shares;
+
+--creating share
+create share MY_SHARE;
+
+
+-- (I)
+--Grant Permissions on all tables of schemas
+GRANT SELECT on all tables in database sharing_example_db TO SHARE MY_SHARE;   --Grant not executed: Operation not supported on a SHARE object.
+
+
+-- (II)
+Grant USAGE on database sharing_example_db TO SHARE MY_SHARE;   --statement executed successfully
+-- GRANT USAGE on SCHEMA sharing_example_db.sharing_schema1TO SHARE MY_SHARE;
+
+GRANT SELECT on all tables in database sharing_example_db TO SHARE MY_SHARE; --Statement executed successfully. 3 objects affected.
+
+ALTER SHARE MY_SHARE ADD ACCOUNT =  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+--Creating Reader Account for Non-Snowflake Uses
+
+//STEP-1 : Creating Reader/Managed Acc.
+CREATE MANAGED ACCOUNT outside_cust_Reader_account
+ADMIN_NAME = outsideadmin,
+ADMIN_PASSWORD = 'Amma@143',        -- min: 8
+TYPE = READER;
+
+--{"accountName":"OUTSIDE_CUST_READER_ACCOUNT","accountLocator":"VLB41048","url":"https://xlzjfpc-outside_cust_reader_account.snowflakecomputing.com","accountLocatorUrl":"https://vlb41048.us-east-1.snowflakecomputing.com"}
+
+show shares;
+create SHARE SHARE_DATABASE;   --share obj created
+
+desc SHARE SHArE_DATABASE;
+
+show MANAGED ACCOUNTS;
+
+
+--STEP-2: Sharing Data with the managed account
+
+--Provide USAGE Permissions on DB & Schema 
+GRANT USAGE on DATABASE SHARING_EXAMPLE_DB TO SHARE share_database;
+
+--Grant Usage on schema 
+GRANT USAGE on SChema SHARING_EXAMPLE_DB.sharing_schema1 TO SHARE share_database;
+
+GRANT USAGE on SChema SHARING_EXAMPLE_DB.sharing_schema2 TO SHARE share_database;
+
+--Giving SELECt access on table
+GRANT SELECT on TABLE SHARING_EXAMPLE_DB.sharing_schema1.customer_table TO SHARE share_database;
+
+GRANT SELECT on ALL TABLES IN SCHEMA SHARING_EXAMPLE_DB.sharing_schema2 TO SHARE share_database;  --Statement executed successfully. 1 objects affected.
+
+
+--alter share to the account
+ALTER SHARE share_database ADD ACCOUNT = VLB41048;
+
+
+--STEP-3: Login to Reader acc. with provided privileges
+
+
+
+
+--(I)
+insert into sharing_example_db.sharing_schema1.customer_table values(2, 'insertData2', '7687939322');
+select * from sharing_example_db.sharing_schema1.customer_table;
+--When I try to query the table in Managed Acc.DIRECTLY w.o perform any GRANT USAGE AGAIN after new record get inserted     ==>> 000606 (57P03): No active warehouse selected in the current session. Select an active warehouse with the 'use warehouse' command.
+-- I am created virtual WH & try query got new record in Managed acc.
+
+
+--(II)
+--Now, grant usage permissions on schema2 for all tables
+
