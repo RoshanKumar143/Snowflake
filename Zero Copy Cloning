@@ -1,0 +1,45 @@
+create schema bulk_loading.cloud_examples;
+
+--creating cloned table
+create table bulk_loading.cloud_examples.NEET_BATCH_CLONE1
+CLONE bulk_loading.load_examples.NEET_BATCH;
+
+select * from bulk_loading.load_examples.NEET_BATCH;     --Original Table
+
+select * from bulk_loading.cloud_examples.NEET_BATCH_CLONE1;       --Cloned Table    6/11/2024, 7:27:14 AM
+
+desc table bulk_loading.cloud_examples.NEET_BATCH_CLONE1;
+
+update bulk_loading.cloud_examples.NEET_BATCH_CLONE1 SET sname = 'abc';
+
+select * from bulk_loading.cloud_examples.NEET_BATCH_CLONE1 BEFORE(TIMESTAMP => '2024-06-11 07:27:14'::timestamp)
+
+select * from bulk_loading.cloud_examples.NEET_BATCH_CLONE1 AT(OFFSET => -5*60) 
+
+
+
+SELECT // Gather information about tables
+ID
+,TABLE_NAME
+,TABLE_SCHEMA as SCHEMA
+,TABLE_CATALOG as CATALOG
+,ACTIVE_BYTES
+,TIME_TRAVEL_BYTES / (1024 * 1024 * 1024) as TIMETRAVEL_IN_GB
+,FAILSAFE_BYTES / (1024 * 1024 * 1024) as FAILSAFE_IN_GB
+,IS_TRANSIENT
+,TABLE_CREATED
+,TABLE_DROPPED
+,TABLE_ENTERED_FAILSAFE
+FROM SNOWFLAKE.ACCOUNT_USAGE.TABLE_STORAGE_METRICS
+WHERE TABLE_CATALOG = 'BULK_LOADING'
+ORDER BY TABLE_CREATED DESC ;
+
+select * from bulk_loading.ALL_TRN_TABLES.claims_example;
+desc table bulk_loading.ALL_TRN_TABLES.claims_example
+
+insert into bulk_loading.ALL_TRN_TABLES.claims_example values(1, '2024-05-28', 1002, 24, 50, 280000, 23)
+
+select * from bulk_loading.ALL_TRN_TABLES.claims_example AT (OFFSET => -5*60);
+
+select * from bulk_loading.ALL_TRN_TABLES.claims_example BEFORE(TIMESTAMP => '');
+
