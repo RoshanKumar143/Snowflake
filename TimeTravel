@@ -1,0 +1,91 @@
+show tables;
+
+show table NEET_BATCH;
+
+--creating a table to perform Timetravel 
+
+create table NEET_BATCH(
+    sid int,
+    sname varchar(30),
+    score int,
+    percentage float,
+    location varchar(40),
+    age int
+)
+
+describe table NEET_BATCH;
+desc table NEET_BATCH;
+
+select * from NEET_BATCH;
+
+insert into NEET_BATCH values (1, 'Rama', 85, 85.6, 'Kerala', 25), (2, 'Sunitha', 95, 96.1, 'Hyd', 29), (3, 'Suresh', 65, 60.5, 'Pune', 24), (4, 'Charan', 75, 75.6, 'Pune', 25), (5, 'Krish', 95, 98.5 ,'Hyd', 25);
+
+select last_query_id();  --01b4d395-0305-369a-0006-297b0002d3e2
+
+update NEET_BATCH SET sname = 'Ben10';
+
+select * from NEET_BATCH;
+
+
+-- (1) offset Time Travel Model-> for backup data
+
+select * from NEET_BATCH AT(OFFSET => -3*60);
+
+create table NEET_BATCH_bkp1 as select * from NEET_BATCH AT(OFFSET => -4*60);
+
+select * from NEET_BATCH_bkp1;
+
+insert into NEET_BATCH values(6, 'abc', 99, 99.5, 'Hyd', 23), (7, 'xyz', 99, 99.5, 'Kerala', 23);
+
+update NEET_BATCH A from NEET_BATCH_bkp1 B SET sname = B.sname 
+where A.sid = B.sid;
+
+
+---------------------------------------------------------------
+
+-- (2) Time Travel Point_In_Time  (TimeStamp())
+
+create table NEET_BATCH1 (sid int, sname varchar(30), location varchar(30));
+
+insert into NEET_BATCH1 values (1, 'Rama', 'Ayodhya'), (2, 'Sita', 'Ayodhya'), (3, 'Lakshmana', 'Ayodhya'), (4, 'Ravanasura', 'Lanka Nagar'), (5, 'Sugriva', 'lanka Nagar');  
+-- 6/6/2024, 6:42:33 PM
+select current_timestamp()   --    2024-06-06 06:19:28.085 -0700
+
+--query_id : 01b4d418-0305-3695-0006-297b0003341a
+
+update NEET_BATCH1 SET location = 'Ayodhya' where location = 'lanka Nagar';
+
+select * from NEET_BATCH1;
+
+select * from NEET_BATCH1 BEFORE(STATEMENT => '01b4d41a-0305-3690-0006-297b000313ce');   --updated query_id
+
+create table NEET_BATCH1_bkp as select * from NEET_BATCH1 BEFORE(STATEMENT => '01b4d41a-0305-3690-0006-297b000313ce');
+
+select * from NEET_BATCH1_bkp;
+
+------------------------------------------------------------------------
+
+-- (3) Timestamp()
+
+--select * from NEET_BATCH1 BEFORE(TIMESTAMP => '6/6/2024, 6:42:33 PM');
+-- select * from NEET_BATCH1 BEFORE(TIMESTAMP => '2024-06-06 06:10:28.085 -0700');
+
+
+
+select * from BULK_LOADING.LOAD_EXAMPLES.NEET_BATCH;
+
+update BULK_LOADING.LOAD_EXAMPLES.NEET_BATCH SET sname = 'NA';
+
+select current_timestamp();    --2024-06-12 04:29:15.861 -0700
+
+ALTER SESSION SET TIMEZONE = 'UTC';
+
+select current_timestamp();   -- 2024-06-12 11:30:56.709 +0000
+
+select * from BULK_LOADING.LOAD_EXAMPLES.NEET_BATCH BEFORE(TIMESTAMP => '2024-06-12 11:20:56.709 +0000'::timestamp);
+
+insert into BULK_LOADING.LOAD_EXAMPLES.NEET_BATCH values (8, 'newData', 100, 100, 'HYD', 100);
+
+select current_timestamp();   -- 2024-06-12 11:39:03.067 +0000
+
+select * from BULK_LOADING.LOAD_EXAMPLES.NEET_BATCH BEFORE(TIMESTAMP => '2024-06-12 11:37:03.067 +0000'::timestamp);
