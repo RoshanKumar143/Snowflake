@@ -1,0 +1,234 @@
+--TASKS
+/*
+    Task -> To accomplish a job 
+    Schedule -> in a point of time
+*/
+
+show tables;
+
+-- (I) creating table with AUTOINCREMENT  => "TABLE LEVEL SEQUENCE"
+create or replace table stud_task_example(
+    id int AUTOINCREMENT START= 1 INCREMENT = 1,
+    name varchar(50) DEFAULT 'AUTO STUDENT',
+    create_date TIMESTAMP    --will give record insertion time
+);
+
+select * from BULK_LOADING.load_examples.stud_task_example;
+-- delete from BULK_LOADING.load_examples.stud_task_example;
+
+--creating a TASK to insert data every minute into stud_task_example
+create or replace TASK stud_task_example_task
+WAREHOUSE = COMPUTE_WH
+SCHEDULE = '2 MINUTE'
+AS
+insert into stud_task_example (create_date) values(current_timestamp);
+
+show TASKS;
+
+//my task is in Suspensio state
+
+//I need to resume my task to active it
+ALTER TASK stud_task_example_task RESUME;
+
+select * from stud_task_example;
+
+-- select 366/60/24
+//I need to suspend a task to not run it until th emaintainance is complete
+ALTER TASK stud_task_example_task SUSPEND
+
+truncate table stud_task_example;
+
+
+
+
+--creating Second TASK to insert data every minute into stud_task_example
+create or replace TASK stud_task_example_task2
+WAREHOUSE = COMPUTE_WH
+SCHEDULE = 'USING CRON * * * * * UTC'
+AS
+insert into stud_task_example (name, create_date) values('Task2_On_Progress',current_timestamp);
+
+show TASKS;
+
+//I need to resume my task to active it
+ALTER TASK stud_task_example_task2 RESUME;
+
+select * from stud_task_example order by create_date desc;
+
+//I need to suspend a task to not run it until th emaintainance is complete
+ALTER TASK stud_task_example_task2 SUSPEND
+
+
+
+
+-------------------------------------------------------------------------------------------------------
+--(II) SEQUENCE 
+
+-- (A NOORDERED SEQUENCE (DEFAULT)
+
+-- STEP-1 : creating table and woking with sequence
+create or replace table stud_task_example(
+    id int, 
+    name varchar(20) DEFAULT 'AUTO STUDENT',
+    create_date TIMESTAMP
+)
+
+show tables like '%stud_task%'
+
+-- STEP-2 : creating noorder sequence obj
+create sequence SEQ WITH START = 1 INCREMENT = 1 comment = 'my first sequence defalut NOORDER';
+create or replace sequence SEQ WITH START = 1 INCREMENT = 1 NOORDER comment = 'my first sequence defalut NOORDER';
+
+show sequences;
+
+--run cmd to observe values
+select SEQ.nextval;
+
+
+--STEP-3 : insert records to table using SQL
+insert into stud_task_example (id, create_date) values (SEQ.nextval, current_timestamp);
+insert into stud_task_example (id, create_date) values (SEQ.nextval, current_timestamp);
+insert into stud_task_example (id, create_date) values (SEQ.nextval, current_timestamp);
+
+select * from stud_task_example;
+
+truncate table stud_task_example;
+
+
+
+----------------------------------
+
+-- (B) ORDERED SEQUENCE :
+
+--creating Ordered sequence 
+create sequence SEQ1 WITH START = 1 INCREMENT = 1 ORDER comment  = 'my first orderes sequence';
+
+--inserting records into table with Orderes Sequence
+insert into stud_task_example (id, create_date) values (SEQ1.nextval, current_timestamp);
+insert into stud_task_example (id, create_date) values (SEQ1.nextval, current_timestamp);
+insert into stud_task_example (id, create_date) values (SEQ1.nextval, current_timestamp);
+
+select * from stud_task_example order by create_date desc;
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+
+--NEED TO RUN MULTIPLE QUERIES UNDER SAME TASK
+
+--EX-1
+  ------
+
+--Stored Procedure:: -> " set of cmds "
+
+
+-- STEP - 1 : creating table with AUTOINCREMENT
+create or replace table stud_task_example(
+    id int AUTOINCREMENT START = 1 INCREMENT = 1,
+    name varchar(20) DEFAULT 'AUTO STUDENT',
+    create_date TIMESTAMP
+);
+
+-- STEP - 2 : Scheduling Task for 2 Minute.
+    
+    //creating a task to insert data every minute into table
+
+create or replace TASK stud_task_example_task1
+WAREHOUSE = COMPUTE_WH
+SCHEDULE = '1 Minutes'
+AS insert into stud_task_example (create_date) values(current_timestamp);
+
+ALTER TASK stud_task_example_task1 RESUME;
+ALTER TASK stud_task_example_task1 SUSPEND;
+
+
+
+--STEP-3 : 
+
+--creating sequence 
+create or replace sequence SEQ1 WITH START = 1 INCREMENT = 1 ORDER comment  = 'my first orderes sequence';
+
+-- --inserting records into table with Orderes Sequence
+-- insert into stud_task_example (id, create_date) values (SEQ1.nextval, current_timestamp);
+-- insert into stud_task_example (id, create_date) values (SEQ1.nextval, current_timestamp);
+-- insert into stud_task_example (id, create_date) values (SEQ1.nextval, current_timestamp);
+
+--creating TASK
+create or replace task stud_task_example_task_cron
+WAREHOUSE = COMPUTE_WH
+SCHEDULE = 'USING CRON * * * * * UTC'
+AS
+INSERT into stud_task_example (id, name, create_date) values (SEQ1.nextval, 'ROSHAN', current_timestamp);
+
+ALTER TASK stud_task_example_task_cron RESUME;
+ALTER TASK stud_task_example_task_cron SUSPEND;
+
+select * from stud_task_example
+
+--*********************Not Workig Task - 2***********************
+--------------------------------------------------------------------------------------------------
+
+
+--EX-2
+  ------
+
+--Stored Procedure:: -> " set of cmds "
+
+
+-- STEP - 1 : creating table 
+create or replace table stud_task_example(
+    id int,
+    name varchar(20) DEFAULT 'AUTO STUDENT',
+    create_date TIMESTAMP
+);
+
+-- STEP - 2 : Scheduling Task for 2 Minute.
+
+    //creating Sequence for Task
+
+create or replace sequence SEQ WITH START = 1 INCREMENT = 1 ORDER comment  = 'my first ordered sequence';
+
+
+    //creating a task to insert data every minute into table
+
+create or replace TASK stud_task_example_task1
+WAREHOUSE = COMPUTE_WH
+SCHEDULE = '2 Minutes'
+AS insert into stud_task_example (id, create_date) values(SEQ.nextval, current_timestamp);
+
+ALTER TASK stud_task_example_task1 RESUME;
+ALTER TASK stud_task_example_task1 SUSPEND;
+
+
+
+--STEP-3 : 
+
+
+--creating TASK (PARENT TASK)
+create or replace task stud_task_example_task_cron
+WAREHOUSE = COMPUTE_WH
+SCHEDULE = 'USING CRON * * * * * UTC'
+AS
+INSERT into stud_task_example (id, name, create_date) values (SEQ.nextval, 'ROSHAN', current_timestamp);
+
+ALTER TASK stud_task_example_task_cron RESUME;
+ALTER TASK stud_task_example_task_cron SUSPEND;
+
+
+select * from stud_task_example order by create_date desc;
+
+truncate table stud_task_example;
+
+show TASKS;
+
+
+--creating CHILD TASK
+create or replace TASK stud_task_example_task_cron_child
+WAREHOUSE = COMPUTE_WH
+AFTER stud_task_example_task_cron
+AS UPDATE stud_task_example SET name = 'Hari' where  name ilike '%Auto%'
+
+--NOTE : Unable to update graph with root task BULK_LOADING.LOAD_EXAMPLES.STUD_TASK_EXAMPLE_TASK_CRON since that root task is not suspended.
+
+ALTER TASK stud_task_example_task_cron_child RESUME;
+ALTER TASK stud_task_example_task_cron_child SUSPEND;
