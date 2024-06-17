@@ -1,19 +1,14 @@
+--WORKING ON VIEWS
+-- drop database db_task;
+
+create or replace database view_db;
+create schema view_db.view_schema;
 show tables;
--- show tables like '%bulk_loading.load_examples%'
+show views;
 
-select * from bulk_loading.load_examples.NEET_BATCH;
-
-truncate table bulk_loading.load_examples.NEET_BATCH;
-
-desc table bulk_loading.load_examples.NEET_BATCH;
-
-
---WORKING ON TASKS
-create database db_task;
-create schema schema_task;
 
 --creating table
-create table db_task.schema_task.NEET_BATCH (
+create table view_db.view_schema.NEET_BATCH (
     sid int,
     sname varchar(40),
     score int,
@@ -23,51 +18,53 @@ create table db_task.schema_task.NEET_BATCH (
 )DATA_RETENTION_TIME_IN_DAYS = 7;
 
 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (1,'Hari', 950,95.0,'Hyderbad',22); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (2,'Ganesh', 950,95.0,'BZA',21); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (3,'Krishna', 965,96.5,'Pune',23); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (4,'Charith', 960,96.0,'Mumbai',21); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (5,'Gowri', 960,96.0,'Bangloore',21); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (6,'Uma', 990,99.0,'Hyderbad',20); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (7,'Ramya', 990,99.0,'Vizag',21); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (1,'Hari', 950,95.0,'Hyderbad',22); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (2,'Ganesh', 950,95.0,'BZA',21); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (3,'Krishna', 965,96.5,'Pune',23); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (4,'Charith', 960,96.0,'Mumbai',21); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (5,'Gowri', 960,96.0,'Bangloore',21); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (6,'Uma', 990,99.0,'Hyderbad',20); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (7,'Ramya', 990,99.0,'Vizag',21); 
 
-select * from db_task.schema_task.NEET_BATCH;
+select * from view_db.view_schema.NEET_BATCH;
 
---creating VIEW 
+
+
+-- (I). creating NORMAL/NON-MATERIALIZED/STANDARD - VIEW 
 create or replace VIEW NEET_BATCH_VIEW AS
- (select * from db_task.schema_task.NEET_BATCH);
+ (select * from view_db.view_schema.NEET_BATCH);
 
 -- drop VIEW db_task.schema_task.NEE_BATCH_VIEW;
 show VIEWS;
-show terse VIEWS; 
-show views in account; --get limited metadata columns
+show terse VIEWS; --get limited metadata columns
+show views in account; 
 
-select * from db_task.schema_task.NEET_BATCH_VIEW;
+select * from view_db.view_schema.NEET_BATCH_VIEW;
 
 --insert data into table and query view (data dynamically updated in viewa(DML cmds))
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (8,'chaha', 960,96.0,'amz',21); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (9,'sucha', 990,99.0,'amz',20); 
-insert into db_task.schema_task.NEET_BATCH (SID,sname,score,percentile,location,age) values (10,'chicha', 990,99.0,'amz',21); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (8,'chaha', 960,96.0,'amz',21); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (9,'sucha', 990,99.0,'amz',20); 
+insert into view_db.view_schema.NEET_BATCH (SID,sname,score,percentile,location,age) values (10,'chicha', 990,99.0,'amz',21); 
 
 
 
 --achieving ROW-LEVEL SECURITY
-create VIEW db_task.schema_task.NEET_BATCH_rowsec_VIEW AS
- (select * from db_task.schema_task.NEET_BATCH WHERE location = 'amz');
+create or replace VIEW view_db.view_schema.NEET_BATCH_rowsec_VIEW AS
+ (select * from view_db.view_schema.NEET_BATCH WHERE location = 'amz');
 
-select * from db_task.schema_task.neet_batch_rowsec_view;
+select * from view_db.view_schema.NEET_BATCH_rowsec_VIEW;
 
 
 --achieving COLUMN-LEVEL SECURITY
-create VIEW db_task.schema_task.neet_batch_colsec_view AS
- (select sname, location from db_task.schema_task.NEET_BATCH);
+create or replace VIEW view_db.view_schema.NEET_BATCH_colsec_view AS
+ (select sname, location from view_db.view_schema.NEET_BATCH);
 
-select * from db_task.schema_task.neet_batch_colsec_view;
+select * from view_db.view_schema.NEET_BATCH_colsec_view;
 
 
 
 --AGgregate VIEW
-create VIEW db_task.schema_task.neet_batch_AGG_VIEW AS
+create or replace VIEW view_db.view_schema.NEET_BATCH_AGG_VIEW AS
  (select 
   count(sid) as "Number of Students",
   avg(score) as "AVG Score of Students",
@@ -75,20 +72,77 @@ create VIEW db_task.schema_task.neet_batch_AGG_VIEW AS
   max(score) as "Maximum Score of Students",
   avg(percentile/100) as "avg percentile",
   count(distinct(location)) as "Number of Locations"
-  from db_task.schema_task.neet_batch
+  from view_db.view_schema.NEET_BATCH
 );
 
-select * from db_task.schema_task.neet_batch_AGG_VIEW;
+select * from view_db.view_schema.NEET_BATCH_AGG_VIEW;
 
 
 
 -- join view 
-/*
-CREATE OR REPLACE VIEW db_task.schema_task.NEET_BATCH_JOIN_VIEW as 
+
+select B.SNAME,B.SCORE,A.* from
+view_db.view_schema.NEET_BATCH_AGG_VIEW A  -- agg view 
+JOIN 
+view_db.view_schema.NEET_BATCH_rowsec_VIEW B -- row sec view 
+
+CREATE OR REPLACE VIEW view_db.view_schema.NEET_BATCH_JOIN_VIEW as 
 (select B.SNAME,B.SCORE,A.* from
-BULK_LOADING.LOAD_EXAMPLE.NEET_BATCH_AGG_VIEW A  -- agg view 
-JOIN BULK_LOADING.LOAD_EXAMPLE.NEET_BATCH_rowsec_VIEW B -- row sec view 
+view_db.view_schema.NEET_BATCH_AGG_VIEW A  -- agg view 
+JOIN 
+view_db.view_schema.NEET_BATCH_rowsec_VIEW B -- row sec view 
 );
 
-select * from  BULK_LOADING.LOAD_EXAMPLE.NEET_BATCH_JOIN_VIEW;
-*/
+select * from  view_db.view_schema.NEET_BATCH_JOIN_VIEW;
+
+
+
+show VIEWS;
+
+-- (II). Creating SECURE - VIEWS
+
+create VIEW view_db.view_schema.NEET_BATCH_VIEW_SCEURE AS
+ ( select * from view_db.view_schema.NEET_BATCH );
+
+select * from view_db.view_schema.NEET_BATCH_VIEW_SCEURE;
+
+
+-- SECURE Aggregate VIEW
+create or replace VIEW view_db.view_schema.NEET_BATCH_AGG_VIEW_secure AS
+ (select 
+  count(sid) as "Number of Students",
+  avg(score) as "AVG Score of Students",
+  min(score) as "Minimum SCore of Students",
+  max(score) as "Maximum Score of Students",
+  avg(percentile/100) as "avg percentile",
+  count(distinct(location)) as "Number of Locations"
+  from view_db.view_schema.NEET_BATCH
+);
+
+select * from view_db.view_schema.NEET_BATCH_AGG_VIEW_secure;
+
+-- CREATING SECURE JOIN VIEW
+CREATE OR REPLACE SECURE VIEW view_db.view_schema.NEET_BATCH_JOIN_VIEW_SECURE as 
+(select B.SNAME,B.SCORE,A.* from
+view_db.view_schema.NEET_BATCH_AGG_VIEW_secure A  -- agg view 
+JOIN 
+view_db.view_schema.NEET_BATCH_rowsec_VIEW B -- row sec view 
+);
+
+select * from view_db.view_schema.NEET_BATCH_JOIN_VIEW_SECURE; -- secure view
+select * from view_db.view_schema.NEET_BATCH_JOIN_VIEW; -- Normal view
+
+
+
+--Working on MATERIALIZED-VIEW
+
+CREATE OR REPLACE MATERIALIZED VIEW view_db.view_schema.NEET_BATCH_VIEW_MATERIALIZED as 
+( select * from view_db.view_schema.NEET_BATCH );
+
+select * from view_db.view_schema.NEET_BATCH_VIEW_MATERIALIZED ; 
+
+--secured Materialized view
+CREATE OR REPLACE SECURE MATERIALIZED VIEW view_db.view_schema.NEET_BATCH_VIEW_SECURE_MATERIALIZED as 
+( select * from view_db.view_schema.NEET_BATCH);
+
+select * from view_db.view_schema.NEET_BATCH_VIEW_SECURE_MATERIALIZED;
