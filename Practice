@@ -1,0 +1,302 @@
+create database Practice;
+
+create table Practice.PUBLIC.STUDENT(
+    sid int, 
+    sname varchar(50),
+    course varchar(30),
+    fee float,
+    location varchar(30),
+    DOJ date
+);
+desc table Practice.PUBLIC.STUDENT;
+drop table Practice.PUBLIC.Student;
+-- DOJ format => 'YYYY-MM-DA' --> ONLY POSSIBLE
+
+insert into Practice.PUBLIC.STUDENT values(1, 'Hari', 'SQL', 25000, 'US', '2005-01-28');
+insert into Practice.PUBLIC.STUDENT values
+    (2, 'Haritha', 'Python', 20000, 'Kerala', '2001-01-01'),
+    (3, 'Haritha', 'SQl', 10000, 'Kerala', '2001-01-01'),
+    (4, 'Rama', 'Java', 20000, 'Hyd', '2005-01-01'),
+    (5, 'Saritha', 'Devops', 15000, 'Hyd', '2010-01-01');
+
+insert into Practice.PUBLIC.STUDENT values
+    (6, 'Aki', 'Python', 12000, 'Kerala', '2001-01-01'),
+    (7, 'Sus', 'SQL', 11000, 'Kerala', '2001-01-01'),
+    (8, 'mega', 'Java', 22000, 'Hyd', '2005-01-01'),
+    (9, 'Sarith', 'Devops', 17000, 'Hyd', '2010-01-01');
+
+--querying table
+select * from Practice.PUBLIC.STUDENT;
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+--(1) WHERE CLAUSE
+--Multiple Filter Conditions on WHERE CLAUSE
+
+select sid, sname, course from Practice.PUBLIC.STUDENT 
+-- WHERE course = 'SQL';
+WHERE upper(course) = 'SQL';
+
+select sid, sname, course from Practice.PUBLIC.STUDENT 
+WHERE lower(course) = 'sql';
+
+select sid, sname, course as COURSE from Practice.PUBLIC.STUDENT 
+WHERE sname = 'Rama';
+
+select sid, sname, course as COURSE from Practice.PUBLIC.STUDENT 
+WHERE sname like 'Rama';
+
+--AND OR
+-- select sid, sname, course as COURSE from Practice.PUBLIC.STUDENT 
+-- WHERE sname = 'Rama' and  sname = 'Hari';
+
+select sid, sname, course as COURSE from Practice.PUBLIC.STUDENT 
+WHERE sname = 'Rama' or sname = 'Hari';
+
+select sid, sname, course as COURSE from Practice.PUBLIC.STUDENT 
+WHERE not sname = 'Rama';
+select * from PRACTICE.PUBLIC.STUDENT
+select sid, sname, course, fee as COURSE from Practice.PUBLIC.STUDENT 
+WHERE fee <= 30000 AND ( lower(course) = 'sql'  or course = 'Python' );
+
+select sid, sname, course from PRACTICE.PUBLIC.STUDENT
+WHERE (sid, sname) = (1, 'Hari');
+
+select sid, sname, course as COURSE from Practice.PUBLIC.STUDENT 
+WHERE sname in ('Rama', 'Hari');
+
+select sid, sname, course, fee as COURSE from Practice.PUBLIC.STUDENT 
+WHERE fee between 10000 and 20000;
+
+select sid, sname, course, fee as COURSE from Practice.PUBLIC.STUDENT 
+WHERE fee in (10000, 20000)  -- only get 10000 and 20000 only
+
+
+--WHERE CLAUSe WITH EXISTS, ANY, ALL
+--------------------
+
+--------------------
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+--(II). Group by , having Clause & distinct
+select * from Practice.PUBLIC.STUDENT;
+
+--list course avail
+select distinct course from Practice.PUBLIC.STUDENT;
+
+select course from Practice.PUBLIC.STUDENT
+group by course;
+
+
+--count of stud's learning sql
+select course, count(*) from  Practice.PUBLIC.STUDENT
+group by course;
+
+select max(fee) from Practice.PUBLIC.STUDENT;
+
+
+select lower(course), sum(fee) from Practice.PUBLIC.STUDENT
+group by lower(course)
+having lower(course) = 'sql';
+
+select * from Practice.PUBLIC.NEET_BATCH_stud
+
+--diff b/w distinct & group by
+select location from Practice.PUBLIC.NEET_BATCH_stud
+group by location
+
+select distinct location from Practice.PUBLIC.NEET_BATCH_stud
+
+select score, location from Practice.PUBLIC.NEET_BATCH_stud
+group by location, score
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+--windows Function
+drop table Practice.PUBLIC.NEET_BATCH_stud; 
+
+create or replace table Practice.PUBLIC.NEET_BATCH_stud (
+    sid int,
+    sname varchar(35),
+    score int,
+    percentage float,
+    location varchar(35),
+    age int
+);
+
+-- truncate table Practice.PUBLIC.STUDENT;
+
+insert into Practice.PUBLIC.NEET_BATCH_stud (SID,sname,score,percentage,location,age) 
+values  (seq.nextval,'Hari', 950,95.0,'Hyderbad',22),
+        (seq.nextval,'Ganesh', 950,95.0,'BZA',21),
+        (seq.nextval,'Krishna', 965,96.5,'Pune',23),
+        (seq.nextval,'Charith', 960,96.0,'Mumbai',21),
+        (seq.nextval,'Gowri', 960,96.0,'Bangloore',21),
+        (seq.nextval,'Uma', 990,99.0,'Hyderbad',20),
+        (seq.nextval,'Ramya', 990,99.0,'Vizag',21),
+        (seq.nextval,'Kishore', 995,99.5,'Miyapur',22),
+        (seq.nextval,'Prasad', 990,99,'KPHB',22);
+
+-- creating sequence
+create sequence SEQ WITH START = 1 INCREMENT = 1 ORDER comment = 'This is my First Sequence for student ID';
+
+select * from Practice.PUBLIC.NEET_BATCH_STUD;
+
+select sid, sname, score, percentage, 
+dense_rank() over( order by score desc ) rnk
+from Practice.PUBLIC.NEET_BATCH_stud;
+
+--want top 2 ranker
+select sid, sname, score, percentage, 
+dense_rank() over( order by score desc ) rnk
+from Practice.PUBLIC.NEET_BATCH_stud
+qualify rnk <= 2;
+
+ --rank()
+select sid, sname, score, percentage, 
+rank() over( order by score desc ) rnk
+from Practice.PUBLIC.NEET_BATCH_stud
+qualify rnk <= 2;
+
+ --row_number()
+ 
+select sid, sname, score, percentage,
+row_number() over( order by score desc ) row_number
+from Practice.PUBLIC.NEET_BATCH_stud;
+
+
+ --ntile
+select sid, NTILE(3) OVER ( ORDER BY sid asc ) from Practice.PUBLIC.NEET_BATCH_stud;
+
+ 
+--------------------------------------------------------------------------------------------------------------------------------
+
+--CTS (Create Table as)
+
+select * from Practice.PUBLIC.NEET_BATCH_stud;
+
+ -- (A) Creating Table Definition Using Existing Table with "LIKE" Operator
+create table Practice.PUBLIC.NEET_BATCH_stud_1 LIKE Practice.PUBLIC.NEET_BATCH_stud; 
+select * from Practice.PUBLIC.NEET_BATCH_stud_1;
+
+ -- (B) Creating Table Definition with data From Exisiting Table 
+create table Practice.PUBLIC.NEET_BATCH_stud_2 AS Select * from Practice.PUBLIC.NEET_BATCH_stud
+select * from Practice.PUBLIC.NEET_BATCH_stud_2
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+-- Joins
+/*
+    1. Inner Join
+    2. Left Outer Join
+    3. Right Outer Join
+    4. Full Outer Join
+    5. Product Join
+    6. Self Join
+*/
+
+-- Tabl1 -1 | student table
+create table Practice.Public.Student_table(
+    sid int, 
+    sname varchar(35),
+    age int
+);
+
+insert into Practice.Public.Student_table values
+    (1, 'Aana', 20),
+    (2, 'Aanad', 19),
+    (3, 'Bunny', 21),
+    (4, 'Chinnu', 22),
+    (5, 'Deepu', 25),
+    (6, 'Eshawar', 18),
+    (7, 'Flora', 21),
+    (8, 'Gani', 20),
+    (9, 'Hari', 22),
+    (10, 'Indu', 20)
+
+-- Table -2 | Marks Table
+create table Practice.Public.marks_table(
+    sid int,
+    marks int, 
+    rank int
+)
+
+insert into Practice.Public.marks_table values 
+        (1, 89, 6),
+        (2, 95, 3),
+        (3, 76, 9),
+        (4, 80, 8),
+        (5, 98, 1),
+        (6, 92, 4),
+        (7, 90, 5),
+        (8, 82, 7),
+        (9, 97, 2),
+        (10, 98, 1)
+
+-- Table -3 | sports Table
+create table Practice.Public.sports_table(
+    sid int, 
+    sports varchar(35)
+)
+
+insert into Practice.Public.Sports_table values
+    (1, 'Cricket'),
+    (3, 'Volleyball'),
+    (5, 'Basketball'),
+    (6, 'Cricket'),
+    (7, 'Volleyball'),
+    (10, 'Basketball')
+
+-- Table -4 | ncc_nss_table
+create table ncc_nss_table(
+    sid int, 
+    ncc_nss varchar(20)
+)
+
+insert into Practice.Public.ncc_nss_table values
+    (1, 'ncc'),
+    (2, 'nss'),
+    (3, 'ncc'),
+    (6, 'nss'),
+    (8, 'nss'),
+    (10, 'ncc')
+    
+
+select B.sid, A.sname, B.marks, B.rank from Practice.Public.Student_table A
+INNER JOIN
+Practice.Public.marks_Table B
+on 
+A.sid = B.sid;
+
+/*
+--Product Joi
+select B.sid, A.sname, B.marks, B.rank, C.sports   from Practice.Public.Student_table A
+INNER JOIN
+Practice.Public.marks_Table B
+INNER JOIN 
+Practice.Public.Sports_Table C
+on 
+A.sid = B.sid = C.sid;
+*/
+
+select B.sid, A.sname, B.marks, B.rank, C.sports, D.ncc_nss   from Practice.Public.Student_table A
+INNER JOIN
+Practice.Public.marks_Table B on A.sid = B.sid
+INNER JOIN 
+Practice.Public.Sports_Table C on A.sid = C.sid
+INNER JOIN
+Practice.Public.ncc_nss_Table D on A.sid = D.sid
+
+
+select B.sid, A.sname, B.marks, B.rank, C.sports, D.ncc_nss  from Practice.Public.Student_table A
+FULL OUTER JOIN
+Practice.Public.marks_Table B on A.sid = B.sid
+FULL OUTER JOIN 
+Practice.Public.Sports_Table C on A.sid = C.sid
+FULL OUTER JOIN
+Practice.Public.ncc_nss_Table D on A.sid = D.sid
