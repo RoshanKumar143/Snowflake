@@ -300,3 +300,49 @@ FULL OUTER JOIN
 Practice.Public.Sports_Table C on A.sid = C.sid
 FULL OUTER JOIN
 Practice.Public.ncc_nss_Table D on A.sid = D.sid
+
+
+--self join
+
+    --creating Table
+CREATE or replace TABLE Practice.Public.employees_tbl(
+    emp_no INT Primary Key NOT NULL,
+    first_name VARCHAR (50) NOT NULL,
+    last_name VARCHAR (40) NOT NULL,
+    gender VARCHAR (20) NOT NULL,
+    dept_no VARCHAR (40) NOT NULL,
+    salary INT NOT NULL,
+    title VARCHAR(40) NOT NUll,
+    mgr_emp_no INT,
+    hire_date DATE,
+    to_date DATE
+);
+
+insert into Practice.Public.employees_tbl values            (1,'Hari','A','M','d01',80000,'Sr.Analyst',2,'2020-01-01','9999-12-31'),(2,'Ganesh','B','M','d02',100000,'Manager',8,'2022-01-01','9999-12-31'),(3,'Krishna','C','M','d03',80000,'Sr.Analyst',2,'2021-01-01','9999-12-31'),(4,'Charith','D','M','d04',90000,'Principal Analyst',8,'2022-01-01','9999-12-31'),(5,'Surendra','A','M','d05',80000,'Supervisor',2,'2022-01-01','9999-12-31'),(6,'Sunitha','B','F','d01',70000,'Analyst',8,'2023-01-01','9999-12-31'),(7,'Roushan','C','M','d02',75000,'Analyst',4,'2021-01-01','9999-12-31'),(8,'Yuktha','D','F','d03',60000,'staff',4,'2021-01-01','9999-12-31'),(9,'Ramya','A','F','d04',150000,'Sr.Manager',10,'2022-01-01','9999-12-31'),(10,'Krishna','A','M','d05',200000,'CTO',00,'2023-01-01','9999-12-31'),(11,'Ram','Reddy','M','d06',20000000,'CEO',00,'2020-01-01','9999-12-31');
+
+select emp.first_name, emp.title, mgr.first_name, mgr.title from 
+Practice.Public.employees_tbl emp
+LEFT OUTER JOIN
+Practice.Public.employees_tbl mgr
+-- on emp.mgr_emp_no = mgr.emp_no;
+on emp.mgr_emp_no = mgr.emp_no;
+
+
+select emp.first_name, emp.title, mgr.first_name, mgr.title from 
+Practice.Public.employees_tbl emp
+LEFT OUTER JOIN
+Practice.Public.employees_tbl mgr
+-- on emp.mgr_emp_no = mgr.emp_no;
+on mgr.mgr_emp_no = emp.emp_no;
+
+
+--Cross JOIN
+--Product JOIN
+--Cartesian Product JOIN
+
+
+
+
+----------------------------------------------------------------------------------
+show tables;
+
