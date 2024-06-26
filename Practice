@@ -341,8 +341,37 @@ on mgr.mgr_emp_no = emp.emp_no;
 --Cartesian Product JOIN
 
 
-
-
 ----------------------------------------------------------------------------------
 show tables;
+
+--SET OPERATORS
+
+create table set_opt_stud (
+    sid int, 
+    sname varchar(20) 
+)
+
+insert into PRACTICE.PUBLIC.set_opt_stud values
+    (1, 'Ram'), (2, 'Seema'), (3, 'Teju'), (4, 'Ramesh'), (5, 'Sreekar'), (6, 'Virat')
+
+create table PRACTICE.PUBLIC.set_opt_sport(
+    sid int, 
+    sport_name varchar(25)
+)
+
+insert into PRACTICE.PUBLIC.set_opt_sport values
+    (1, 'Cicket'), (2, 'Khabadi'), (4, 'Volleyball'), (6, 'Cricket'), (6, 'Football'), (1, 'Basketball')
+
+ --UNION
+ select sid, sname from PRACTICE.PUBLIC.set_opt_stud 
+ UNION
+ select sid, sport_name from PRACTICE.PUBLIC.set_opt_sport
+
+  select sid, sname from PRACTICE.PUBLIC.set_opt_stud 
+ UNION ALL
+ select sid, sport_name from PRACTICE.PUBLIC.set_opt_sport
+
+select sid, sname from PRACTICE.PUBLIC.set_opt_stud 
+ MINUS
+ select sid, sport_name from PRACTICE.PUBLIC.set_opt_sport
 
