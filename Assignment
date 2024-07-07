@@ -1,0 +1,111 @@
+create database assign1;
+
+create schema assign1.practice1;
+
+create table employee_table (
+    emp_id int,
+    name varchar(25),
+    age int,
+    salary int,
+    department_id int,
+    hire_date date
+)
+
+create or replace sequence SEQ1 WITH START = 1 INCREMENT = 1 ORDER comment = 'my first sequence defalut NOORDER';
+-- delete from employee_table
+
+show sequences;
+
+-- select SEQ1.nextval;
+
+insert into assign1.practice1.employee_table values (SEQ1.nextval, 'JohnDoe', 28, 50000, 1, '2020-01-15');
+update employee_table SET name = 'John Doe' where emp_id = 1;
+
+insert into assign1.practice1.employee_table values 
+    (SEQ1.nextval, 'Jane Smith', 34, 60000, 2, '2019-07-23'), 
+    (SEQ1.nextval, 'Bob Brown', 45, 80000, 1, '2018-02-12'),
+    (SEQ1.nextval, 'Alice Blue', 25, 45000, 3, '2021-03-22'),
+    (SEQ1.nextval, 'Charlie P.', 29, 50000, 2, '2019-12-01');
+
+select * from employee_table
+
+
+create table department_table (
+    department_id int, 
+    name varchar(25)
+)
+
+insert into department_table values
+    (1, 'IT'),
+    (2, 'HR'),
+    (3, 'Finance'),
+    (4, 'Marketing');
+
+select * from department_table;
+
+
+create table project_table (
+    project_id int,
+    name varchar(25),
+    department_id int
+)
+
+insert into project_table values 
+    (1, 'Project Alpha', 1),
+    (2, 'Project Beta', 2),
+    (3, 'Project Gamma', 1),
+    (4, 'Project Delta', 3),
+    (5, 'Project Epsilon', 4);
+
+select * from project_table 
+
+-- delete from project_table
+
+
+---------------------------------------------------------------------------------------------------
+
+-- BASIC QUERIES
+
+--1. Select all the columns from the employee table
+select * from employee_table;
+
+--2. Select only the name and salary columns from the employee table
+select name, salary from employee_table;
+
+--3. Select employees who are older than 30
+select * from employee_table 
+WHERE age > 30; 
+
+--4, Select the names of all the departments
+select name from department_table
+
+--5. Select employees who work in the IT department
+select * from employee_table
+WHERE department_id in (select department_id from department_table WHERE name = 'IT');
+
+
+
+--------------------------------------------------------------------------------------------------
+
+--STRING MATCHING QUERIEs
+
+--6. Select employees whose names start with 'j'
+select name from employee_table
+WHERE lower(name) like 'j%';
+
+--7. Select employees whose names end with 'e'
+select name from employee_table
+WHERE name like '%e';
+
+--8.Select employees whose names contain 'a'
+select name from employee_table
+WHERE name like '%a%';
+
+--9. Select employees whose names are exactly 9 characters long
+select name from employee_table
+WHERE length(name) = 9;
+
+--10. Select employees whose names have 'o' as the second character
+select name from employee_table
+WHERE name like '_o%';
+
