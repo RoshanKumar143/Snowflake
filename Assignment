@@ -109,3 +109,87 @@ WHERE length(name) = 9;
 select name from employee_table
 WHERE name like '_o%';
 
+
+-----------------------------------------------------------------------------------------------------------
+
+
+-- DATA QUERIES
+
+-- 11. Select employees hired in the year 2020
+select * from employee_table
+
+select * from employee_table
+WHERE 
+
+
+
+-- 12. Select employees hired in January of any year
+
+
+-- 13. Select employees hired before 2019
+select * from employee_table
+WHERE hire_date < '2019-01-01';
+
+-- 14. Select employees hired on or after March 1,2021
+select * from employee_table
+WHERE hire_date >= '2021-03-01';
+
+-- 15. Select employees hired in the last 2 years
+
+
+
+-------------------------------------------------------------------------------------------------------
+
+-- AGGREGATE QUERIES
+
+select * from employee_table
+
+-- 16. Select the total salry of all employees
+select sum(salary) as Total_Salary from employee_table;
+
+-- 17. Select the average salary of employees
+select avg(salary) as Avg_Salary_0f_Employees from employee_table;
+
+-- 18. Select the minimum salary in the Employee table
+select min(salary) from employee_table
+
+--19. Select the number of employees in ecah department
+select department_id, count(*) from employee_table
+group by department_id;
+
+-- 20.Select the average salary of employees in each department
+select department_id, avg(salary) from employee_table
+group by department_id;
+
+
+------------------------------------------------------------------------------------------------------
+
+-- Group By Queries
+
+select * from employee_table
+
+-- 21. Select the total salary for each department
+select department_id, sum(salary) Dept_wise_Total_Salary from employee_table
+group by department_id;
+
+-- 22. Select the average age of employees in each department
+select department_id, avg(age) Dept_wise_Avg_Age from employee_table
+group by department_id;
+
+-- 23. Select the number of employees hired in each year
+
+
+-- 24. Select the highest salary in seach department
+select department_id, max(salary) Dept_wise_Highest_Salary from employee_table
+group by department_id;
+
+-- 25. Select the department with the highest average salary
+-- select department_id, max(dept_wise_Avg_Sal) from employee_table
+-- WHERE department_id, avg(salary) dept_wise_Avg_Sal IN (select department_id, avg(salary) from employee_table
+-- GROUP BY department_id);
+
+select department_id, avg(salary) dept_wise_Avg_Sal from employee_table
+GROUP BY department_id
+having max(dept_wise_Avg_Sal); 
+
+-- NOTE : Aggregate functions cannot be nested:
