@@ -570,6 +570,17 @@ GROUP BY dept.name
 ORDER BY AVG(salary) DESC
 LIMIT 1   --HR	70000.000000
 
+select * from employee_table
+WHERE salary > (
+    select AVG(emp.salary) from employee_table AS emp
+    INNER JOIN
+    department_table AS dept
+    ON emp.department_id = dept.department_id
+    GROUP BY dept.name 
+    ORDER BY AVG(salary) DESC
+    LIMIT 1 
+)
+
 
 select department_id, AVG(salary) from employee_table
 GROUP BY department_id
