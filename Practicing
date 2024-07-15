@@ -1,0 +1,611 @@
+employee_table : emp_id, name, age, salary, department_id, hire_date
+department_table : department_id, name
+project_table : project_id, name, department_id
+
+
+--1. 
+select * from employee_table;
+
+--2. 
+select name AS emp_Name, salary AS emp_Sal from employee_table
+
+--3. 
+select * from employee_table
+WHERE age > 30;
+
+--4. 
+Select name AS Dept_Names from department_table
+
+--5. 
+Select * from employee_table
+WHERE department_id IN (
+    select department_id from department_table as dept WHERE dept.name = 'IT'
+);
+
+--6. 
+select name AS emp_Name from employee_table
+WHERE lower(name) LIKE 'j%'
+
+--7.
+select name AS emp_Name from employee_table
+WHERE lower(name) LIKE '%e';
+
+--8. 
+select name AS emp_Name from employee_table
+WHERE name LIKE '%a%';
+
+--9. 
+select name AS emp_Name from employee_table
+WHERE LENGTH(name) = 9;
+
+--10. 
+select name AS emp_Name from employee_table
+WHERE name LIKE '_o%';
+
+select name AS emp_Name from employee_table
+WHERE SUBSTR(name,2,1) = 'o';
+
+--11. 
+select * from employee_table
+WHERE YEAR(hire_date) = 2020;
+
+--12. 
+select * from employee_table
+WHERE MONTH(hire_date) = 1; 
+
+--13. 
+select * from employee_table
+WHERE YEAR(hire_date) < 2019;
+
+--14. 
+select * from employee_table
+WHERE hire_date >= '2021-03-01'; 
+
+--15.
+select * from employee_table
+WHERE hire_date < (
+    select MAX(hire_date) from employee_table  --2024-01-15
+)
+ORDER BY hire_date DESC
+
+--16.
+select SUM(salary) AS Total_Salary from employee_table
+
+--17. 
+select AVG(salary) AS Avg_Sal from employee_table
+
+--18. 
+select MIN(salary) AS Min_Salary from employee_table
+
+--19. 
+select dept.name AS dept_Name, COUNT(emp.emp_id) AS Number_of_Emp from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name;
+
+--20. 
+select dept.name AS dept_Name, AVG(emp.salary) AS Dept_Wise_Avg_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+
+--21. 
+select dept.name AS dept_Name, SUM(emp.salary) from employee_table as emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+
+--22. 
+select dept.name AS dept_Name, AVG(emp.age) from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name;
+
+--23. 
+select YEAR(hire_date) AS Years, COUNT(emp.emp_id) AS No_of_Emp from employee_table AS emp
+GROUP BY Years
+ORDER BY Years DESC;
+
+select * from employee_table
+
+--24. 
+select dept.name AS dept_Name, Max(emp.salary) AS Dept_Wise_Highest_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+
+--25. 
+select dept.name AS dept_Name, AVG(emp.salary) AS Dept_Wise_Highest_Avg_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name;
+
+--26. 
+select dept.name AS dept_Name, COUNT(emp.emp_id) AS No_of_Emp from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+HAVING No_of_Emp > 2;
+
+--27.
+select dept.name AS dept_Name, AVG(emp.salary) AS Dept_Avg_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+HAVING Dept_Avg_Sal > 55000;
+
+--28. 
+select YEAR(hire_date) AS Years, COUNT(emp_id) AS No_of_Emp from employee_table 
+GROUP BY Years
+HAVING No_of_Emp > 1;
+
+--29. 
+select dept.name AS dept_Name, SUM(emp.salary) AS Dept_Wise_Total_sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+HAVING Dept_Wise_Total_Sal < 100000;
+
+--30. 
+select dept.name AS dept_Name, MAX(emp.salary) AS Max_Sal from employee_table as emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+HAVING Max_Sal > 75000;
+
+--31. 
+select * from employee_table
+ORDER BY salary ASC;
+
+--32. 
+select * from employee_table
+ORDER BY age DESC;
+
+--33. 
+select * from employee_table
+ORDER BY hire_date ASC;
+
+--34. 
+select emp.name AS emp_Name,dept.name AS dept_Name, emp.salary AS Emp_Sal from employee_table as emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY emp.name, dept.name, emp.salary
+ORDER BY dept.name,emp.salary DESC;
+
+--35. 
+select dept.name AS dept_Name, SUM(emp.salary) AS Emp_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+GROUP BY dept.name
+ORDER BY SUM(emp.salary) DESC;
+
+--36. 
+select emp.name AS emp_Name, dept.name AS dept_Name from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+
+
+--37. 
+select project.name AS Project_Name, dept.name AS dept_Name from department_table AS dept
+INNER JOIN
+project_table AS project 
+ON dept.department_id = project.department_id
+
+--38. 
+select emp.name AS emp_Name, project.name AS Project_Name from employee_table AS emp
+INNER JOIN
+project_table AS project
+ON emp.department_id = project.department_id;
+
+--39. 
+select emp.name AS Emp_Name, COALESCE(dept.name, 'Employees With Out Dept') AS Dept_Name from employee_table AS emp
+LEFT OUTER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id;
+
+--40. 
+select COALESCE(emp.name,'Dept_Without_Emps') AS Emp_Name, dept.name AS Dept_Name from employee_table AS emp
+RIGHT OUTER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id;
+
+--41.
+select emp.name AS Emp_Name, project.name AS Project_Name from employee_table AS emp
+LEFT OUTER JOIN
+project_table AS project
+ON emp.department_id = project.department_id
+WHERE project.name IS NULL;
+
+--42. 
+select emp.name AS Emp_Name, dept.name AS Dept_Name, COUNT(project.project_id) AS No_of_Project from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+INNER JOIN
+project_table AS project
+ON emp.department_id = project.department_id;
+
+select emp.name AS Emp_Name, dept.name AS Dept_Name, COUNT(project.project_id) AS No_of_Project from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+INNER JOIN
+project_table AS project
+ON emp.department_id = project.department_id
+GROUP BY emp.name, dept.name;
+
+--43. 
+select dept.name AS Dept_Name, emp.name AS Emp_Name from employee_table AS emp
+RIGHT OUTER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+WHERE Emp_Name IS NULL;
+
+--44. 
+select name from employee_table 
+WHERE department_id IN (
+    select department_id from employee_table 
+    WHERE name = 'John Doe'
+    );
+
+--45. 
+select dept.name AS Dept_Name, AVG(emp.salary) AS Dept_Wise_Avg_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+GROUP BY dept.name
+ORDER BY Avg(emp.salary) DESC
+LIMIT 1;
+
+--46. 
+select name, salary, 
+dense_rank() over(ORDER BY salary DESC) AS rnk
+from employee_table
+qualify rnk = 1;
+
+select MAX(salary) from employee_table
+
+--47. 
+select name from employee_table
+WHERE salary > (
+    select AVG(salary) from employee_table
+)
+
+select * from employee_table
+WHERE salary > (
+    select AVG(salary) from employee_table
+)
+
+
+--48. For Duplicates 
+select name, salary, 
+dense_rank() over(ORDER BY salary DESC) AS rnk
+from employee_table
+qualify rnk = 2;
+
+--FOR unique records
+-- select * from employee_table
+-- ORDER BY SALARY DESC
+-- LIMIT 1 OFFSET 1
+
+--49. 
+select dept.name AS Dept_Name, COUNT(emp.emp_id) AS No_of_Emp from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+GROUP BY dept.name
+ORDER BY No_of_Emp DESC
+LIMIT 1; //DO IT AGAIN
+
+select dept.department_id, dept.name, COUNT(emp.emp_id) from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+GROUP BY dept.name, dept.department_id;
+
+
+select * from employee_table
+insert into employee_table VALUES(9, 'HRNew', 80, 100000, 2, '2024-07-01');
+
+--50. 
+select emp.name AS Emp_Name, emp.salary AS Emp_Sal from employee_table AS emp
+
+--dept Wise Avg Sal
+select dept.name AS dept_Name, AVG(emp.salary) AS Dept_Avg_Sal from employee_table AS emp
+INNER JOIN 
+department_table AS dept
+ON emp.department_id = dept. department_id
+GROUP BY dept.name;
+
+
+select emp.name AS Emp_Name, dept.name AS dept_Name,emp.salary AS Emp_sal, AVG(emp.salary) AS Dept_Avg_Sal from employee_table AS emp
+INNER JOIN 
+department_table AS dept
+ON emp.department_id = dept. department_id
+GROUP BY emp.name, dept.name, emp.salary
+HAVING emp.salary > AVG(emp.salary);
+
+select emp.name AS Emp_Name, dept.name AS dept_Name,emp1.salary AS Emp_sal, AVG(emp.salary) AS Dept_Avg_Sal from employee_table AS emp
+INNER JOIN 
+department_table AS dept
+ON emp.department_id = dept. department_id
+INNER JOIN
+employee_table AS emp1
+ON emp.department_id = emp1.department_id
+GROUP BY emp.name, dept.name, emp1.salary
+HAVING emp1.salary > AVG(emp.salary);
+
+EMP_NAME	DEPT_NAME	EMP_SAL	DEPT_AVG_SAL
+John Doe	IT	80000	50000.000000
+John Doe	IT	60000	50000.000000
+Charlie P.	HR	60000	50000.000000
+Virat	IT	80000	60000.000000
+
+--DEPT Wise Avg Salary Results
+
+DEPT_NAME	DEPT_AVG_SAL
+IT	63333.333333
+HR	55000.000000
+Finance	45000.000000
+
+
+--51. 
+select emp.name AS Emp_Sal, emp.salary AS Emp_Sal, 
+dense_rank() over(ORDER BY emp.salary DESC) AS rnk
+from employee_table AS emp
+qualify rnk = 3
+LIMIT 1;
+
+--52. 
+select emp.name AS Emp_Name, dept.name AS dept_Name, emp.age AS Emp_Age  from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+WHERE dept.name = 'HR'
+ORDER BY emp.salary DESC
+LIMIT 1;
+
+--verification
+select dept.name AS dept_Name, emp.age from employee_table as emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id;
+
+
+--53.
+select dept.name AS dept_Name, AVG(emp.salary) AS Emp_Sal from employee_table AS emp
+INNER JOIN 
+department_table AS dept
+ON emp.department_id = dept.department_id
+GROUP BY dept.name
+HAVING AVG(emp.salary) > 55000;
+
+
+--54. 
+select emp.name AS Emp_Name, COUNT(project.project_id) AS Count_of_Project from employee_table AS emp
+INNER JOIN
+project_table AS project
+ON emp.department_id = project.department_id
+GROUP BY emp.name
+HAVING Count_of_Project >= 2;
+
+--55. 
+select name AS Emp_Name from employee_table
+WHERE hire_date IN (
+    select hire_date from employee_table WHERE name = 'Jane Smith'
+)
+
+select * from employee_table
+
+
+--56. 
+select Year(hire_date) AS Years, SUM(salary) from employee_table
+WHERE Year(hire_date) = 2020
+Group BY Year(hire_date);
+
+--57. 
+select dept.name AS Dept_Name, AVG(emp.salary) AS Dept_Avg_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+ORDER BY Dept_Avg_Sal DESC;
+
+--58.
+select dept.name AS Dept_Name, COUNT(emp.emp_id) AS No_of_Emp from employee_table AS emp
+INNER JOIN 
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+HAVING AVG(emp.salary) > 55000 AND COUNT(emp.emp_id) > 1;
+
+--verify
+select dept.name, COUNT(emp.emp_id), AVG(emp.salary) from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+
+
+--59.
+select COUNT(emp_id), Year(hire_date) from employee_table
+WHERE hire_date IN (
+    select MAX(hire_date) from employee_table)
+Group By hire_date 
+HAVING YEAR(hire_date) BETWEEN YEAR(2024) TO YEAR(2022)
+
+select * from employee_table
+
+--60. 
+-- select dept.name AS dept_Name, COUNT(emp.emp_id) AS Count_of_emp, AVG(emp.salary) AS DepT_Avg_Sal from employee_table AS emp
+-- INNER JOIN
+-- department_table AS dept
+-- ON emp.department_id = dept.department_id
+-- GROUP BY dept.name
+-- HAVING COUNT(emp.emp_id) > 2:
+-- Syntax error: unexpected '<EOF>'.END OF FILE (line 436)
+
+
+select dept.name AS dept_Name, COUNT(emp.emp_id) AS Count_of_emp, AVG(emp.salary) AS DepT_Avg_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+GROUP BY dept.name
+HAVING COUNT(emp.emp_id) > 2;
+
+
+--61.
+
+select emp1.name, emp1.salary from employee_table as emp1
+Where emp1.salary > 
+(select AVG(emp.salary) AS Emp_Sal from employee_table AS emp
+INNER JOIN
+department_table AS dept
+On dept.department_id = emp.department_id
+GROUP BY dept.name)
+
+--fix
+select emp.name, emp.salary from employee_table AS emp
+WHERE emp.salary > (
+    select AVG(emp.salary) from employee_table AS emp JOIN department_table AS dept ON dept.department_id = emp.department_id 
+)
+
+select emp.name, emp.salary from employee_table AS emp
+WHERE emp.salary > (
+    select dept.name, AVG(emp.salary) from employee_table AS emp JOIN department_table AS dept ON dept.department_id = emp.department_id GROUP BY dept.name
+)
+
+--Find department wise avg salary retrieve employees who are earning salary more than max(avg salary)
+
+
+--62.
+select name AS Emp_Name, hire_date AS Years from employee_table
+WHERE hire_date IN (
+    select MIN(hire_date) from employee_table
+)
+
+--63.
+select dept.name AS Dept_Name, COUNT(project.project_id) AS Count_of_Project from department_table AS dept
+INNER JOIN
+project_table AS project
+ON dept.department_id = project.department_id
+GROUP BY dept.name
+ORDER BY Count_of_Project DESC;
+
+--64. 
+select dept.name AS Dept_Name, emp.name AS Emp_Name, emp1.salary AS Emp_Sal,  MAX(emp.salary) AS highest_Emp_Salary from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+INNER JOIN
+employee_table AS emp1
+ON emp.department_id = emp1.department_id
+GROUP BY dept.name, emp.name, emp1.salary
+HAVING emp1.salary > Max(emp.salary)
+
+
+-- Error: 'EMP1.SALARY' in select clause is neither an aggregate nor in the group by clause. (line 487)
+
+
+--65.
+select dept.name, emp.name, emp.age, emp.salary from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+WHERE emp.age > (
+    select AVG(emp.age) from employee_table AS emp
+    INNER JOIN
+    department_table AS dept
+    ON dept.department_id = emp.department_id
+)
+
+NAME	NAME	AGE	SALARY
+HR	Jane Smith	34	60000
+IT	Bob Brown	45	80000
+IT	Virat	38	60000
+
+
+select dept.name, AVG(emp.age) from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON dept.department_id = emp.department_id
+GROUP BY dept.name
+
+NAME	AVG(EMP.AGE)
+IT	37.000000
+HR	31.500000
+Finance	25.000000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--dept wise avg sal
+select dept.name, AVG(emp.salary) from employee_table AS emp
+INNER JOIN
+department_table AS dept
+ON emp.department_id = dept.department_id
+GROUP BY dept.name 
+ORDER BY AVG(salary) DESC
+LIMIT 1   --HR	70000.000000
+
+
+select department_id, AVG(salary) from employee_table
+GROUP BY department_id
+ORDER BY AVG(salary) DESC
+LIMIT 1   -- 6 80000.000000
+
+select AVG(salary) from employee_table
+GROUP BY department_id
+ORDER BY AVG(salary) DESC
+LIMIT 1   -- 80000.000000
+
+select * from employee_table
+
+select * from employee_table
+WHERE salary > (
+    select AVG(salary) from employee_table
+GROUP BY department_id
+ORDER BY AVG(salary) DESC
+LIMIT 1 
+)
+
+
+
+select * from employee_table 
+WHERE salary > (
+    select AVG(salary), 
+dense_rank() over(order by AVg(salary) DESC ) AS rnk from employee_table
+GROUP BY department_id
+Qualify rnk = 1
+)
+
+
+DEPARTMENT_ID	AVG(SALARY)
+1	63333.333333
+2	70000.000000
+3	45000.000000
+5	75000.000000
+6	80000.000000
+
