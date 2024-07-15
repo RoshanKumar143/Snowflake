@@ -606,12 +606,24 @@ LIMIT 1
 
 select * from employee_table 
 WHERE salary > (
-    select AVG(salary), 
-dense_rank() over(order by AVg(salary) DESC ) AS rnk from employee_table
+    select AVG(salary)
+ from employee_table
 GROUP BY department_id
-Qualify rnk = 1
+Qualify dense_rank() over(order by AVg(salary) DESC )  = 1
 )
 
+select * from employee_table 
+WHERE salary > (80000)
+
+
+
+with cte as (select AVG(salary), 
+dense_rank() over(order by AVg(salary) DESC ) AS rnk from employee_table
+GROUP BY department_id
+Qualify rnk = 1)
+
+select * from employee_table 
+WHERE salary > 
 
 DEPARTMENT_ID	AVG(SALARY)
 1	63333.333333
@@ -620,3 +632,16 @@ DEPARTMENT_ID	AVG(SALARY)
 5	75000.000000
 6	80000.000000
 
+
+
+with cte as (select AVG(salary) as avg_salary, 
+dense_rank() over(order by AVg(salary) DESC ) AS rnk from employee_table
+GROUP BY department_id
+Qualify rnk = 1)
+
+
+
+
+
+select * from employee_table 
+WHERE salary > (select avg_salary from cte );
