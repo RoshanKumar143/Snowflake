@@ -1,0 +1,401 @@
+CREATING STORAGE INTIGRATOR FOR aws S3 & Loading Data 
+Loading Data from AWS S3 using storage Integration for Loading Data.
+--------------------------------------------------------------------------------------------------------------
+
+Purpose of creating Storage Integrator:
+	> we want to copy file from AWS S3 to Snowflake for that need to create Storage Integration
+
+(I)
+
+Syntax:
+	create storage INTGRATION s3_int3
+	TYPE = EXTERNAL_STAGE
+	STORAGE_PROVIDER = 'S3'
+	STORAGE_AWS_ROLE_ARN = '<give role of the AWS. Should be created within AWS before run integration >'
+	ENABLED = TRUE
+	STORAGE_ALLOWED_LOCATION = ( 'S3URI' )
+	COMMENT = 'my aws s3 integration3'
+
+
+s3_int3 -> Integration_Name
+<AWS Role> -> Go TO AWS CONSOLE > IAM
+		. Roles
+		. create Role
+		. - Select AWS account
+		  - check on : Require external ID (b'coz we want to allow from the third party environment that is Snowflake and vice-versa)
+		   - External ID : 0000 
+		   - NEXT
+		. Policies
+		   - 1. Read files(read only) -> AmazonS3FullACCESS
+		   - 2. During unload we want to write file to S3( means Write Permission ) -> AmazonS3ReadonlyAccess
+		   - NEXT
+		. Role Details:
+		   - Role name : my_snowflake_role2	
+		   - Description : My snowflake role
+		   - CREATE
+		. OPEN created role
+		   - COPY ROLE ARN
+
+STORAGE_ALLOWED_LOCATION : Means, which S3 bucket want to allow S3URI
+				(s3>buckets>SelectBucket(vishnurs)>COPY-S3-URI (bucketPath) )
+
+
+
+(II) Describe our Integration
+	> DESCRIBE INTEGRATION s3_int3
+
+NOTE: now, copy 5 & 7 -> STORAGE_AWS_IAM_USER_ARN  & STORAGE_AWS_EXTERNAL_ID
+
+. Come to
+	ROLES
+	   . open our role(created one)
+		- GO TO TRUSE relationships
+		       - Edit Trust policy (JSON)
+			   . 'AWS'= '<PASTE ROW NO-5>'
+			   . 'EXTERNALID'= '<paste 7 instead of 0000>'
+	UPDATE POLICY
+
+NOTE : In Trust relation AWS & ExternalID got updated( TAKEN FROM Snowflake DESC Integratin). Then olny access must be granted.
+
+
+(III)
+> show storage Integrations;
+
+-------------------------COMMUNICATION was set b/w snowflake & AWS----------------------
+
+(IV) Create stage with Header
+
+> SHOW STAGES;
+> DROP stage s3_dept_stage_withheader;
+
+> CREATE STAGE s3_dept_stage_withheader
+  URL = 's3://vishnurs/dept_csv.csv' -- copy & paste S3 URI
+  STORAGE_INTEGRATION = s3_int3 
+  FILE_FORMAT = ( TYPE = CSV, skip_header=1 )
+  COMMENT = 'my s3 external stage with CSV format with no header'
+
+> show stages
+
+
+(V) 
+
+
+
+
+
+	Snowpipe Demo by PALLAVI:
+--------------------------------------------------------------------
+
+	Snowpipe:
+      --------------
+
+. Snowpipe is a Snowflake Object which automatically copies and loads the data into the snowflake Table.
+. It copies from the External Environment LIKE AWS, Azure, or GCP.
+. Here we will look into how a FILE will be copies auto. from AWS platform S3 TO Snowflake Table.
+
+Q) Diff b/w Manual load and Snowpipe?
+> Snowflake will auto. recognize if there is any change in the file and it loads the data.OK.
+Q) How do we VALIDATE Whether the data has loaded or not?
+> First as soon as we create all the req'd things for snowpipe it will copies the data auto. ok.(ourself Without loading).
+  Then after that we'll change the file in the source and wait for some time and we'll see that the latest change data also will be copied into snowflak Table means,
+   ( without ourself running any load command ) If it is copying auto. means, snowpipe is working as expected.OK.
+   There are some steps to do that.
+
+---------PALLAVI
+. Till now we have seen manual copying and loading into the snowflake environment
+. For that we have 
+	1. created STORAGE INTEGRATION
+	2. stage( named_Stage )
+		- url -> S3 Bucket URL(up to s3 bucket only URL)
+		- Storage integration
+		- file format
+	3. Create a Table Schema for which we need to load the file data 
+	4. Create pipe
+		- auto_ingestion = true  --enable auto ingestion data
+		- COPY stmt -> from stage selecting 5 columns & loading that into the tables
+		( To achieve connection b/w the snowflake and S3 Bucket we have IAM role
+			. GO TO S3 BUCKET (created bucket)
+			. Go to properties ( for S3 we need to give permissions to the snowflake environment to give notifications for that we add "EVENT Notification") )
+				> CREATE EVENT
+				   - Event name:
+				   - Suffix-optional: .csv  -- that will restrict only csv files to getloaded into thetable. THis is Event Notification.
+				   - check BOX : All object create events  --whenever a new obj. is created in the S3 bucket then it should load auto. so for that we need tho CHECK the BOX.
+				   - Give PERMISSIOn to 
+					1. SQS queue -- That will send notification from S3 TO Snowflake 
+					2. Enter SQS queue ARN -- this we will get from pipe, when we create a pipe we get some ARN.
+			> Show pipes
+			 **copy and paste notification_channel in SQS queue:_____________   -> to Establish connection b/w servers.
+
+			SAVE CHANGES
+
+
+NOTE : To establish connection b/w to send notifications that whenever a new files or .CSV file comes into S3 Bucket it should notify the snowflake environment.  
+       That a new file is added to my bucket so you can load that auto. 
+       so to send that notification we create Event Notification.
+ 	 	
+	
+		5. Come to IAM ROLE> POLICIES : Along with previous 2 policies
+						. OPEN SQS (give access to SQS policy)
+					> SQSACCESSForSnowpipe <already created policy>
+					. we are customizing 
+
+				. create policy (we can give whatever the policy we want)
+					> select JSON
+					
+		But search sqs (SQSACCESSForSnowpipe)> OPEN SQS> JSON
+			*NOTE: REFER PALLAVI3.jpg 
+			*write sqs actions ...... in SQS permissions
+			*RESOURCE : arn PIPE
+
+		This is customized/we biuld policy JSON.
+
+
+		6. upload csv file new data
+		7. select query run
+		> truncate employee;
+
+
+
+------------------------------------------------------------------------------------
+
+	Loading & Unloading PARQUET and JSON data in Snowflake
+	-------------------------------------------------------
+
+#Loading PARQUET data into Snowflake
+#Loading  JSON data into Snowflake
+#UNLoading from Snowflake in PARQUET FORMAT
+#UNLoading from Snowflake in JSON FORMAT
+
+
+> We can see now HOW TO LOAD PARQUET FILE ( data ) into SNOWFLAKE TABLES.
+> In real time we generally work with either CSV file or some Delimited file.So pipe delimited / tab delimited some delimited files, PARQUET files which are comes under FLAT FILES.
+
+
+ 
+Previous we seen HOW TO ESTABLISH CONNECTION UISNG INTEGRATION.Configuration IMP.
+. Integration is a ONE TIME ACTIVITY( dont have to create it every time ). we can use it every time.
+
+
+
+STEPS :
+
+1. Create Table dept_parquet
+	(
+		deptno int,
+		ename varchar(20),
+		loc varchar(20),
+	)	COMMENT = 'my department table';
+	
+  > select count(*) from dept_parquet;  -- check data +ve / not if so truncate table
+  > truncate dept_parquet;
+
+
+2. Make sure File is REAdy?
+   . we are loading from Source to Target
+	Source => S3 
+	Target => Snowflake Table
+
+   > Go To AWS S3 Bucket( vishnurs )
+	. dept.parquet => file
+	. copy S3 URI
+NOTE: The Speciality of PARQUET file is it will copy the METADATA( means, like wstorehat column names, what is the dtypes all this info. it will remember/store. so nned to use same column names in Table as per the PARQUET FILE. )
+
+3. Create Integration is already there USE IT. (connectivity)
+
+	> create storage INTGRATION s3_int 
+
+
+4. create stage
+   
+   > drop stage s3_dept_stage_parquet;
+	
+   > CREATE STAGE if not exists s3_dept_stage_parquet
+     URL = 's3://vishnurs/dept.parquet' -- copy & paste S3 URI
+     STORAGE_INTEGRATION = s3_int
+     FILE_FORMAT = ( TYPE = parquet )
+     COMMENT = 'my s3 external stage with parquet format';
+
+   - View our stage
+	> show stages;
+
+
+NOTE: for FLat FIles CSV files gave skip_header = 1 ANd If we are using Delimitor file(each column seperated by delimitor)
+      for PARQUET, AVRO, JSON it's not aplicatble skip_header = 1
+
+	> stage will copy the S3 data into Snowflake environment basically.
+          ( Stage is like intermediate storage / place to hold the data before loading into TARGET TABLE Ok. )
+
+
+5. Load Data 
+        (1). Copy with transfermative Syntax:
+
+	> copy into dept_parquet from (
+		select $1:deptno, $1:dname, $1:loc from s3_dept_stage_parquet	
+	  )
+
+
+. parquet file format can provide only 1 column (Variant dtype)
+	> copy into dept_parquet from (
+		select * from s3_dept_stage_parquet	
+	  )-- not work 
+	
+	NOTE: Parquet file can product one and only one column of type variant, object, or array.
+	      Suggects:
+	      --------
+	     (1) Load data into seperate columns using the match_By_column_name  
+			OR
+	     (2)  Copy with transformation.
+              
+	error_limit:by default 1 it shows if you get that many errors you fail the load. means, if we get that no. of errors encountered then failed the job.
+	but we have not received any errors see=> ( errors_seen = 0 )so didnot fail it is success.
+	
+	Q) error_limit = 1 ? 
+	    > means, if there is any error stop the job ok.
+
+
+	. Query the Table
+	  > select * from dept_parquet; -- data loaded
+	  > truncate table and run copy cmd.
+
+
+	(2)**  refer doc (snowflake parquet loading syntax)
+	       Option: match_by_column_name
+		> copy into dept_parquet from s3_dept_stage_parquet
+		  file_format = ( TYPE = parquet )
+		  match_by_column_name = case_insensitive  --syntax wise ok but not load data
+
+	NOTE: Snowflake doesnot load duplicate data
+		( after peform copy cmd again if we run copy cmd it will copy 0 files processed. )	
+	
+
+
+--------------------------------------------------------------------------------------------------------
+
+LOADINg JSON FILE:
+-----------------
+
+1. create table (dept_json)
+
+ no need to create connection again OK.Use it only.
+ Integration is one time activity provided by using the same ROLE & same BUCKET.
+
+2. create stage
+	not-use> create STAGE if not exists s3_dept_stage2_json
+	  URL = 'S3/vishnurs/dept.json'
+	  STORAGE_INTEGRATION = s3_int
+	  FILE_FORMAT =  ( TYPE = JSON )
+	  comment = 'my s3 external stage with json format'
+	
+	> show stages;
+
+	use> create STAGE if not exists s3_dept_stage2_json
+	  URL = 'S3/vishnurs/dept.json'
+	  STORAGE_INTEGRATION = s3_int
+	  FILE_FORMAT =  ( TYPE = JSON , strip_outer_array = true)
+	  comment = 'my s3 external stage with json format'
+
+	- strip_outer_array => Actually in redshift we put 1 more option while loading JOSN it is "FORMAT = JSON auto"
+	   JSON need some special attention so, strip_outer_array = true ( means, out side brackets {} canbe removed in JSON FILE )
+
+3. open/download and see file in s3
+   but we cannot see PARQUET b'coz parquet cannot be see, remaining files we can see.  
+
+4. load data from stage (COPY)
+	> check table if have any duplicate copy 0 data.	
+
+	> COPY into dept_json(
+	  from ( select $1:deptno, $1:dname, $1:loc from @s3_dept_stage2_json )
+NOTE: 0 data files get copied since not used strip_outer_array = true.
+
+
+
+CONCLUSION:
+----------
+.This is all about LOADING DATA
+
+
+
+
+--------------------------------------------------------------------------
+
+UNLOADING:
+---------
+. The data is now available in Table now we need to unload into either INTERNAL/EXTERNAL STAGE.
+  > INTERNAL STAGE : means locally
+  > EXTERNAL STAGE : means to AWS S3 / Azure Blocks / GCP
+. For External stage Unloading again we need INTEGRATION definitely( b/coz of from Snowflake we are tryingto put the data into other environment. )
+ 
+STEPS: (50:00)
+-----
+
+1. create stage (INTERNAL STAGE)
+	> create or replace stage my_unload_stage_parquet
+	  FILE_FORMAT = ( TYPE = parquet )
+
+	AND
+ 
+	> create or replace stage my_ext_unload_stage
+	  URL = 's3://vishura/SFunloads/'
+	  STORAGE_INTEGRATION = s3_int   --b'coz we are writing outside of the snowflake environment 
+	  FILE_FORMAT = ( type = CSV )
+
+	-> Then check whether I have SFunloads(FOLDER/Object with in BUcket) in my s3 bucket or not?
+	   not there ok fine.
+
+2. check data in table
+	> select * from dept;
+
+3.for unloading use <copy into stage from table> cmnd means unload
+	> COPY into @my_ext_unload_stage from dept;  --copy into External stage
+
+NOTE: GO TO s3 Bucket and check. Now, SFunloads Folder got created and check file init.
+
+4. create External stage for parquet
+	> create or replace stage my_ext_unload_stage_parquet
+	  URL = 's3://vishura/SFunloads/'
+	  STORAGE_INTEGRATION = s3_int    
+	  FILE_FORMAT = ( type = parquet);
+5. now unload
+	> copy into stage @my_ext_unload_stage_parquet from dept;
+NOTE: ERROR: Files already existing at the unload destination: @my_ext_unload_stage_parquet. Use overwrite option to force unloading.
+
+USINg Overwrite:
+	> copy into stage @my_ext_unload_stage_parquet from dept
+	  overwrite=true  --work rows unloaded and bytes got incresed since PARQUET files will store METADATA thats why more size.
+
+VALIDATE DATA: check in s3 it appears as ( .snappy.arquet )
+
+NOTE: THere are diff file formats likek Parquet, avro, orc, rc and all but among them parquet is the most efficient b'coz it internally uses Snappy compression.
+	The snappy is the compression algorithm.so thats why files are auto. careted with snappy .
+
+-------------------------------------------
+
+
+* Streams tells about CDC ( Change Data Capture ) ->  source  lo edaina data jarigitey changes auto. ga Target lo update avutayi(real time streaming app's).
+
+
+------------------------------------------------------------
+ > in interview need to tell :
+	I have worked with Flat FIles with without header, parquet files, JSON files(with..gz -> compressed file format).
+
+
+
+Q) Tell me the issue you have faced?
+	. Once I'm loading my JSON file you know it was saying that stage is created and copy job also competed but I'm not getting the data OK.
+	. ( NEED to HIGHLIGHT the issue ) I have spent a lot of time figuring out why the data is not getting loaded but you know after enough research i found that i was missing one option 
+	  "strip_outer_array = true" option should be given so I have given that option then it went fine I could be able to load data sccessfully.
+
+
+Q) Tell me other things that you have done?Have you worked with Parquet files? When do we use Parquet and CSV?
+	. If the data is very HUGE like in billions and millions we will go with parquet if the data is less we go ahead with Flat Files.
+
+
+EXERCISE: Try to load JSON data into Snpwflake Table.
+
+
+
+
+
+
+	
+	
